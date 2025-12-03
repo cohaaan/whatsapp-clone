@@ -1,0 +1,60 @@
+name: secure_chat
+description: WhatsApp-class E2E encrypted messaging app
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.4.0
+  riverpod_annotation: ^2.3.0
+
+  # Networking
+  http: ^1.1.0
+  phoenix_socket: ^0.3.1
+
+  # Database
+  drift: ^2.14.0
+  sqlite3_flutter_libs: ^0.5.18
+  sqlcipher_flutter_libs: ^0.6.0
+  path_provider: ^2.1.1
+  path: ^1.8.3
+
+  # Reactive Programming
+  rxdart: ^0.27.7
+
+  # UUID
+  uuid: ^4.2.2
+
+  # Secure Storage
+  flutter_secure_storage: ^9.0.0
+
+  # Device Info
+  device_info_plus: ^9.1.1
+
+  # Firebase (Push Notifications)
+  firebase_core: ^2.24.0
+  firebase_messaging: ^14.7.6
+
+  # UI
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.6
+  drift_dev: ^2.14.0
+  riverpod_generator: ^2.3.0
+
+flutter:
+  uses-material-design: true
+
+  # assets:
+  #   - images/

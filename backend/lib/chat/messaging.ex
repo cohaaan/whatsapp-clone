@@ -379,4 +379,81 @@ defmodule Chat.Messaging do
   end
 
   defp parse_timestamp(_), do: DateTime.utc_now()
+
+  ## Conversation Management
+
+  @doc """
+  List all conversations for a user.
+  """
+  def list_user_conversations(user_id) do
+    query =
+      from c in Conversation,
+        join: cm in "conversation_members",
+        on: cm.conversation_id == c.id,
+        where: cm.user_id == ^user_id and is_nil(cm.left_at),
+        order_by: [desc: c.inserted_at]
+
+    Repo.all(query)
+  end
+
+  @doc """
+  Get conversation by ID.
+  """
+  def get_conversation(conversation_id) do
+    Repo.get(Conversation, conversation_id)
+  end
+
+  @doc """
+  Create a new conversation with members.
+  """
+  def create_conversation(attrs) do
+    Multi.new()
+    |> Multi.insert(:conversation, fn _ ->
+      %Conversation{}
+      |> Conversation.changeset(attrs)
+    end)
+    |> Multi.run(:members, fn _repo, %{conversation: conversation} ->
+      insert_conversation_members(conversation.id, attrs[:member_user_ids])
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{conversation: conversation}} -> {:ok, conversation}
+      {:error, _step, reason, _} -> {:error, reason}
+    end
+  end
+
+  defp insert_conversation_members(conversation_id, user_ids) do
+    entries =
+      Enum.map(user_ids, fn user_id ->
+        %{
+          conversation_id: conversation_id,
+          user_id: user_id,
+          role: "member",
+          joined_at: DateTime.utc_now()
+        }
+      end)
+
+    {count, _} = Repo.insert_all("conversation_members", entries)
+    {:ok, count}
+  end
+
+  @doc """
+  List messages for a conversation.
+  """
+  def list_conversation_messages(conversation_id, since \\ nil, limit \\ 50) do
+    query =
+      from m in Message,
+        where: m.conversation_id == ^conversation_id,
+        order_by: [desc: m.inserted_at],
+        limit: ^limit
+
+    query =
+      if since do
+        from m in query, where: m.inserted_at > ^since
+      else
+        query
+      end
+
+    Repo.all(query)
+  end
 end
